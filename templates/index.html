@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CyberNest - Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+            color: white;
+        }
+        .card:hover {
+            transform: scale(1.03);
+            transition: 0.3s;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">CyberNest</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="/ctf">CTF Helpers</a></li>
+                <li class="nav-item"><a class="nav-link" href="/crypto">Cryptography</a></li>
+                <li class="nav-item"><a class="nav-link" href="/forensics">Digital Forensics</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container text-center mt-5">
+    <h1 class="display-4">Welcome to CyberNest</h1>
+    <p class="lead">Your All-in-One Cybersecurity Toolkit</p>
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white shadow">
+                <div class="card-body">
+                    <h5 class="card-title">CTF Helpers</h5>
+                    <p class="card-text">Decode Base64, Base32, Base85 and more.</p>
+                    <a href="/ctf" class="btn btn-light">Go</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Cryptography</h5>
+                    <p class="card-text">Encrypt & Decrypt messages using AES.</p>
+                    <a href="/crypto" class="btn btn-light">Go</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-warning text-dark shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Digital Forensics</h5>
+                    <p class="card-text">Extract metadata from image files.</p>
+                    <a href="/forensics" class="btn btn-dark">Go</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
