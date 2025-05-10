@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CyberNest - CTF Tools</title>
+    <style>
+        body {
+            background: #121212;
+            color: cyan;
+            font-family: sans-serif;
+            padding: 20px;
+        }
+        h1, h2 {
+            color: cyan;
+        }
+        .tool-card {
+            background: #1e1e1e;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 12px;
+            border: 2px solid cyan;
+            box-shadow: 0 0 15px cyan;
+        }
+        textarea, select {
+            width: 100%;
+            padding: 10px;
+            background: #2a2a2a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        button {
+            background: cyan;
+            color: black;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .output-box {
+            background: #292929;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        .output-box h4 {
+            margin: 0 0 6px;
+        }
+        .output-box ul {
+            padding-left: 20px;
+            margin: 0;
+            line-height: 1.4;
+        }
+        .output-box li {
+            margin: 0;
+            padding: 0;
+            list-style-position: inside;
+        }
+
+        
+
+    </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<div style="padding: 1rem;">
+    <a href="/" style="color:white;font-weight:bold;text-decoration:none;">⬅️ Back to Home</a>
+</div>
+
+<h1>CTF Helper Tools</h1>
+
+<!-- Base Detector Tool -->
+<div class="tool-card">
+    <h2>Base Detector</h2>
+    <form method="POST" action="/ctf/base-detector">
+        <textarea id="baseInput" name="encoded_text" rows="5" placeholder="Paste encoded text...">{{ encoded_input }}</textarea>
+        <div class="btn-group">
+            <button type="submit">Detect Base</button>
+            <button type="button" onclick="copyBaseOutput()">Copy Output</button>
+            <button type="button" onclick="clearText('baseInput', 'baseOutput')">Clear</button>
+        </div>
+    </form>
+    {% if base_result %}
+    <div class="output-box" id="baseOutput">
+        <h4>Detected:</h4>
+        <ul>
+            {% for item in base_result %}
+                <li title="{{ item.reason }}">{{ item.base }} (Confidence: {{ item.confidence }}%)</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Decoder Tool -->
+<div class="tool-card">
+    <h2>Decoder</h2>
+    <form method="POST" action="/ctf/decode">
+        <textarea id="decodeInput" name="input_text" rows="5" placeholder="Encoded text...">{{ input_text }}</textarea>
+        <select name="encoding">
+            <option value="">Select Encoding</option>
+            {% for enc in ['base64', 'base32', 'base16', 'hex', 'binary'] %}
+                <option value="{{ enc }}" {% if selected_encoding == enc %}selected{% endif %}>{{ enc|upper }}</option>
+            {% endfor %}
+        </select>
+        <div class="btn-group">
+            <button type="submit">Decode</button>
+            <button type="button" onclick="copyDecodedOutput()">Copy Output</button>
+            <button type="button" onclick="clearText('decodeInput', 'decodeOutput')">Clear</button>
+        </div>
+    </form>
+    {% if decode_result %}
+    <div class="output-box" id="decodeOutput">
+        <h4>Decoded Output:</h4>
+        <code>{{ decode_result }}</code>
+    </div>
+    {% endif %}
+</div>
+
+<!-- ✨ Magic Auto Decoder -->
+<div class="tool-card">
+    <h2>Magic Auto Decoder</h2>
+    <form method="POST" action="/ctf/magic-decode">
+      <textarea name="magic_input" rows="4" placeholder="Enter encoded string..." required>{{ magic_input }}</textarea>
+      <div class="btn-group">
+        <button type="submit">Auto Decode</button>
+        <button type="reset">Clear</button>
+      </div>
+    </form>
+  
+    {% if magic_results %}
+    <div class="output-box">
+        <strong>🔍 Detected Decodings:</strong>
+        <ul>
+        {% for result in magic_results %}
+            <li><strong>{{ result.encoding }}:</strong> {{ result.output }}</li>
+        {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+
+  </div>
+  
+
+<!-- 🧠 Caesar Brute Force + Dictionary Match -->
+<div class="tool-card">
+    <h2>Caesar Brute Force + Dictionary Match</h2>
+    <form method="POST" action="/ctf/caesar-crack">
+      <textarea name="caesar_input" rows="4" placeholder="Enter Caesar Cipher text to brute force...">{{ caesar_input }}</textarea>
+      <div class="btn-group">
+        <button type="submit">Brute Force</button>
+        <button type="reset">Clear</button>
+      </div>
+    </form>
+  
+    {% if caesar_crack_results %}
+    <div class="output-box">
+      <h4>Results (sorted by most meaningful):</h4>
+      <ul style="padding-left: 20px;">
+        {% for result in caesar_crack_results %}
+          <li><strong>Key {{ result.key }}:</strong> {{ result.output }} (Score: {{ result.score }})</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  </div>
+  
+  
+
+<!-- 🔐 Hash Identifier -->
+<div class="tool-card">
+    <h2>Hash Identifier</h2>
+    <form method="POST" action="/ctf/hash-id">
+      <textarea id="hashInput" name="hash_input" rows="3" placeholder="Enter hash string...">{{ hash_input }}</textarea>
+      <div class="btn-group">
+        <button type="submit">Identify</button>
+        <button type="button" onclick="clearHashTool()">Clear</button>
+      </div>
+    </form>
+  
+    <!-- 🔧 Always-present wrapper for dynamic output -->
+    <div id="hashOutput">
+      {% if hash_types %}
+      <div class="output-box">
+        <strong>🔍 Possible Hash Types:</strong>
+        <ul>
+          {% for h in hash_types %}
+          <li>{{ h }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  
+  <script>
+  function clearHashTool() {
+    const input = document.getElementById("hashInput");
+    const output = document.getElementById("hashOutput");
+    if (input) input.value = "";
+    if (output) output.innerHTML = "";  // Clears the entire output block
+  }
+  </script>
+  
+  
+
+<!-- Scripts -->
+<script>
+
+document.getElementById('chatbot-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') chatbotReply();
+});
+
+function copyBaseOutput() {
+    const outputBox = document.getElementById('baseOutput');
+    if (outputBox) {
+        const items = outputBox.querySelectorAll('li');
+        const outputText = Array.from(items).map(li => li.innerText).join('\n');
+        navigator.clipboard.writeText(outputText)
+            .then(() => alert("Detected output copied!"))
+            .catch(() => alert("Failed to copy output."));
+    } else {
+        alert("No detected output to copy.");
+    }
+}
+
+function clearText(inputId, outputId) {
+    document.getElementById(inputId).value = '';
+    const outputBox = document.getElementById(outputId);
+    if (outputBox) outputBox.innerHTML = '';
+}
+
+function copyDecodedOutput() {
+    const codeTag = document.querySelector('#decodeOutput code');
+    if (codeTag) {
+        const textToCopy = codeTag.innerText;
+        navigator.clipboard.writeText(textToCopy)
+            .then(() => alert("Decoded output copied!"))
+            .catch(() => alert("Failed to copy decoded output."));
+    } else {
+        alert("No decoded output to copy.");
+    }
+}
+</script>
+    
+
+<!-- ✅ Floating Chatbot Included -->
+{% include 'chatbot.html' %}
+</body>
+</html>

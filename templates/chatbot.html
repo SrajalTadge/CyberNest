@@ -1,0 +1,241 @@
+<!-- ✅ Smart Floating Chatbot -->
+<style>
+  #chatbot-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background: #111;
+    color: #ffae42;
+    font-size: 26px;
+    border-radius: 50%;
+    border: 2px solid #ffae42;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 15px #ffae42;
+    z-index: 9999;
+    cursor: pointer;
+  }
+
+  #chatbot-box {
+    position: fixed;
+    bottom: 100px;
+    right: 20px;
+    width: 320px;
+    background: #1f1f1f;
+    border: 2px solid #ffae42;
+    border-radius: 12px;
+    box-shadow: 0 0 20px #ffae42;
+    display: none;
+    z-index: 9998;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  #chatbot-header {
+    background: #ffae42;
+    color: black;
+    padding: 10px 15px;
+    font-weight: bold;
+    font-family: 'JetBrains Mono', monospace;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  #chatbot-close {
+    background: transparent;
+    color: black;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+  }
+
+  #chatbot-response {
+    padding: 10px;
+    color: white;
+    font-size: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    max-height: 200px;
+    overflow-y: auto;
+    background: #1e1e1e;
+  }
+
+  .chat-bubble {
+    padding: 8px 12px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    display: inline-block;
+    max-width: 85%;
+  }
+
+  .bot {
+    background: #444;
+    color: white;
+    align-self: flex-start;
+  }
+
+  .user {
+    background: #ffae42;
+    color: black;
+    align-self: flex-end;
+  }
+
+  .timestamp {
+    font-size: 10px;
+    color: #888;
+    margin-top: -5px;
+  }
+
+  #chatbot-footer {
+    padding: 10px;
+    background: #2a2a2a;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  #chatbot-input {
+    flex: 1;
+    padding: 6px;
+    border-radius: 8px;
+    border: none;
+    background: #333;
+    color: white;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  #chatbot-send {
+    background: #ffae42;
+    color: black;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .faq-buttons {
+    padding: 10px;
+    background: #1f1f1f;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .faq-buttons button {
+    background: black;
+    color: #ffae42;
+    border: none;
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .faq-buttons button:hover {
+    background: #ffae42;
+    color: black;
+  }
+</style>
+
+<!-- ✅ Chatbot HTML -->
+<div id="chatbot-box">
+  <div id="chatbot-header">
+    Ask CyberNest 🤖
+    <button id="chatbot-close">✖</button>
+  </div>
+  <div id="chatbot-response"></div>
+  <div class="faq-buttons">
+    <button onclick="handleChat('what is encryption')">What is Encryption?</button>
+    <button onclick="handleChat('how to use decoder')">Use Decoder</button>
+    <button onclick="handleChat('what is metadata')">What is Metadata?</button>
+    <button onclick="handleChat('ctf helper')">CTF Helper?</button>
+  </div>
+  <div id="chatbot-footer">
+    <input type="text" id="chatbot-input" placeholder="Ask something..." />
+    <button id="chatbot-send">➤</button>
+  </div>
+</div>
+
+<button id="chatbot-toggle">🤖</button>
+
+<!-- ✅ Chatbot JS -->
+<script>
+  let chatbotData = {};
+  fetch('/static/chatbot_qa.json')
+    .then(res => res.json())
+    .then(data => chatbotData = data);
+
+  const toggleBtn = document.getElementById('chatbot-toggle');
+  const closeBtn = document.getElementById('chatbot-close');
+  const box = document.getElementById('chatbot-box');
+  const responseBox = document.getElementById('chatbot-response');
+  const input = document.getElementById('chatbot-input');
+  const sendBtn = document.getElementById('chatbot-send');
+
+  toggleBtn.onclick = () => box.style.display = 'flex';
+  closeBtn.onclick = () => box.style.display = 'none';
+
+  sendBtn.onclick = () => handleChat(input.value);
+  input.addEventListener('keypress', e => {
+    if (e.key === 'Enter') handleChat(input.value);
+  });
+
+  function appendBubble(text, type) {
+    const bubble = document.createElement('div');
+    bubble.className = `chat-bubble ${type}`;
+    bubble.innerText = text;
+
+    const timestamp = document.createElement('div');
+    timestamp.className = 'timestamp';
+    timestamp.innerText = new Date().toLocaleTimeString();
+
+    const wrapper = document.createElement('div');
+    wrapper.appendChild(bubble);
+    wrapper.appendChild(timestamp);
+
+    responseBox.appendChild(wrapper);
+    responseBox.scrollTop = responseBox.scrollHeight;
+  }
+
+  function handleChat(q) {
+    if (!q) return;
+
+    appendBubble(q, 'user');
+    input.value = '';
+    appendBubble('Typing...', 'bot');
+
+    setTimeout(() => {
+      responseBox.lastChild.remove(); // remove typing...
+
+      const question = q.toLowerCase().trim();
+      let answer = null;
+
+      if (['hi', 'hello', 'hare krishna', 'hey'].includes(question)) {
+        answer = 'Hare Krishna 🙏';
+      } else {
+        for (let key in chatbotData) {
+          const entry = chatbotData[key];
+          if (typeof entry === 'object' && entry.keywords) {
+            if (entry.keywords.some(k => question.includes(k.toLowerCase()))) {
+              answer = entry.answer;
+              break;
+            }
+          }
+          if (!answer && key.toLowerCase().includes(question)) {
+            answer = chatbotData[key].answer || chatbotData[key];
+          }
+        }
+      }
+
+      appendBubble(answer || '🤖 Sorry, I don’t know that yet.', 'bot');
+    }, 700);
+  }
+</script>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CyberNest - Cryptography</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background: #121212;
+      color: violet;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 20px;
+      margin: 0;
+    }
+    h1, h2 {
+      color: violet;
+    }
+    .tool-card {
+      background: #1e1e1e;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 12px;
+      border: 2px solid violet;
+      box-shadow: 0 0 15px violet;
+    }
+    textarea, input {
+      width: 100%;
+      padding: 10px;
+      background: #2a2a2a;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    button {
+      background: violet;
+      color: black;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      box-shadow: 0 0 15px violet;
+      transform: scale(1.05);
+      transition: all 0.2s ease-in-out;
+    }
+    .output-box {
+      background: #2a2a2a;
+      padding: 10px 15px;
+      border-radius: 8px;
+      margin-top: 10px;
+      color: white;
+    }
+    .crypto-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .tab-btn {
+      background: #1e1e1e;
+      color: violet;
+      border: 2px solid violet;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .tab-btn:hover {
+      background: black;
+    }
+    .active-tab {
+      background: violet;
+      color: black;
+    }
+    .crypto-tab-content {
+      display: none;
+    }
+    .crypto-tab-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-5px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+
+<a href="/" style="color:white; text-decoration:none;">⬅️ Back to Home</a>
+<h1>Cryptography Tool</h1>
+
+<!-- Tabs -->
+<div class="crypto-tabs">
+  <button class="tab-btn {% if active_tab == 'caesar' or not active_tab %}active-tab{% endif %}" onclick="showTab('caesar', this)">Caesar Cipher</button>
+  <button class="tab-btn {% if active_tab == 'aes' %}active-tab{% endif %}" onclick="showTab('aes', this)">AES-GCM</button>
+</div>
+
+<!-- Caesar Cipher Section -->
+<div id="caesar" class="crypto-tab-content {% if active_tab == 'caesar' or not active_tab %}active{% endif %}">
+  <div class="tool-card">
+    <h2>Encrypt (Caesar)</h2>
+    <form method="POST" action="/crypto/encrypt">
+      <textarea name="plain_text" id="caesarPlain" rows="4" placeholder="Enter text to encrypt...">{{ plain_text }}</textarea>
+      <input name="key" id="caesarKey" placeholder="Key (e.g. 5)" value="{{ request.form.get('key', '') }}">
+      <div class="btn-group">
+        <button type="submit">Encrypt</button>
+        <button type="button" onclick="clearCaesarEncrypt()">Clear</button>
+      </div>
+    </form>
+    {% if encrypted_text %}
+    <div class="output-box">
+      <pre><strong>Encrypted:</strong> <span id="caesarEncrypted">{{ encrypted_text }}</span></pre>
+      <div class="btn-group">
+        <button onclick="copyText('caesarEncrypted')">Copy</button>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="tool-card">
+    <h2>Decrypt (Caesar)</h2>
+    <form method="POST" action="/crypto/decrypt">
+      <textarea name="cipher_text" id="caesarCipher" rows="4" placeholder="Enter text to decrypt...">{{ cipher_text }}</textarea>
+      <input name="key" id="caesarDecryptKey" placeholder="Key (e.g. 5)" value="{{ request.form.get('key', '') }}">
+      <div class="btn-group">
+        <button type="submit">Decrypt</button>
+        <button type="button" onclick="clearCaesarDecrypt()">Clear</button>
+      </div>
+    </form>
+    {% if decrypted_text %}
+    <div class="output-box">
+      <pre><strong>Decrypted:</strong> <span id="caesarDecrypted">{{ decrypted_text }}</span></pre>
+      <div class="btn-group">
+        <button onclick="copyText('caesarDecrypted')">Copy</button>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- AES-GCM Section -->
+<div id="aes" class="crypto-tab-content {% if active_tab == 'aes' %}active{% endif %}">
+  <div class="tool-card">
+    <h2>Encrypt (AES-GCM)</h2>
+    <form method="POST" action="/crypto/aes/encrypt">
+      <textarea name="plain_text" id="aesPlain" rows="4" placeholder="Enter text to encrypt...">{{ aes_plain_text }}</textarea>
+      <input name="key" id="aesKeyEncrypt" placeholder="AES Key (16, 24 or 32 bytes)" value="{{ request.form.get('key', '') }}">
+      <div class="btn-group">
+        <button type="submit">Encrypt</button>
+        <button type="button" onclick="clearAesEncrypt()">Clear</button>
+      </div>
+    </form>
+    {% if aes_encrypted %}
+    <div class="output-box">
+      <pre><strong>Encrypted Output:</strong>
+ciphertext: <span id="aesCipher">{{ aes_encrypted.ciphertext }}</span>
+nonce: <span id="aesNonce">{{ aes_encrypted.nonce }}</span>
+tag: <span id="aesTag">{{ aes_encrypted.tag }}</span></pre>
+      <div class="btn-group">
+        <button onclick="copyText('aesCipher')">Copy Ciphertext</button>
+        <button onclick="copyText('aesNonce')">Copy Nonce</button>
+        <button onclick="copyText('aesTag')">Copy Tag</button>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="tool-card">
+    <h2>Decrypt (AES-GCM)</h2>
+    <form method="POST" action="/crypto/aes/decrypt">
+      <textarea name="ciphertext" id="aesCipherIn" rows="2" placeholder="ciphertext (Base64)">{{ aes_data.ciphertext }}</textarea>
+      <textarea name="nonce" id="aesNonceIn" rows="2" placeholder="nonce (Base64)">{{ aes_data.nonce }}</textarea>
+      <textarea name="tag" id="aesTagIn" rows="2" placeholder="tag (Base64)">{{ aes_data.tag }}</textarea>
+      <input name="key" id="aesKeyDecrypt" placeholder="AES Key (same used for encryption)">
+      <div class="btn-group">
+        <button type="submit">Decrypt</button>
+        <button type="button" onclick="clearAesDecrypt()">Clear</button>
+      </div>
+    </form>
+    {% if aes_decrypted %}
+    <div class="output-box">
+      <pre><strong>Decrypted Message:</strong> <span id="aesDecrypted">{{ aes_decrypted }}</span></pre>
+      <div class="btn-group">
+        <button onclick="copyText('aesDecrypted')">Copy</button>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- JS -->
+<script>
+function showTab(id, btn) {
+  document.querySelectorAll('.crypto-tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active-tab'));
+  btn.classList.add('active-tab');
+}
+
+function copyText(id) {
+  const el = document.getElementById(id);
+  if (el) {
+    navigator.clipboard.writeText(el.textContent || el.innerText);
+    alert("Copied!");
+  }
+}
+
+function clearCaesarEncrypt() {
+  document.getElementById("caesarPlain").value = '';
+  document.getElementById("caesarKey").value = '';
+  const out = document.getElementById("caesarEncrypted");
+  if (out) out.textContent = '';
+}
+
+function clearCaesarDecrypt() {
+  document.getElementById("caesarCipher").value = '';
+  document.getElementById("caesarDecryptKey").value = '';
+  const out = document.getElementById("caesarDecrypted");
+  if (out) out.textContent = '';
+}
+
+function clearAesEncrypt() {
+  document.getElementById("aesPlain").value = '';
+  document.getElementById("aesKeyEncrypt").value = '';
+  ["aesCipher", "aesNonce", "aesTag"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = '';
+  });
+}
+
+function clearAesDecrypt() {
+  document.getElementById("aesCipherIn").value = '';
+  document.getElementById("aesNonceIn").value = '';
+  document.getElementById("aesTagIn").value = '';
+  document.getElementById("aesKeyDecrypt").value = '';
+  const out = document.getElementById("aesDecrypted");
+  if (out) out.textContent = '';
+}
+</script>
+
+<!-- ✅ Floating Chatbot Included -->
+{% include 'chatbot.html' %}
+
+</body>
+</html>

@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CyberNest - Digital Forensics</title>
+    <style>
+        body {
+            background: #121212;
+            color: tomato;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 20px;
+        }
+
+        h1, h2, h3 {
+            color: tomato;
+        }
+
+        .tool-card {
+            background: #1e1e1e;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 12px;
+            box-shadow: 0 0 15px tomato;
+            border: 2px solid tomato;
+        }
+
+        input[type="file"], textarea, select {
+            width: 100%;
+            padding: 10px;
+            background: #2a2a2a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        button, .copy-btn {
+            background: tomato;
+            color: black;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+            margin-right: 10px;
+        }
+
+        .output-box {
+            background: #292929;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 14px;
+            white-space: pre-wrap;
+            color: white;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .decoded-text-box {
+            white-space: pre-line;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 15px;
+            color: white;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+
+        .filename-display {
+            font-size: 0.9rem;
+            color: #ffb3a7;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .error-box {
+            color: red;
+            background: #2a0000;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .encoded-preview {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .encoded-preview img {
+            max-width: 100%;
+            max-height: 300px;
+            margin-top: 10px;
+            border: 2px solid tomato;
+            border-radius: 10px;
+        }
+
+        .encoded-preview a {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 16px;
+            background-color: tomato;
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 6px;
+        }
+
+        .encoded-preview a:hover {
+            background: black;
+            color: tomato;
+            border: 1px solid tomato;
+        }
+    </style>
+</head>
+<body>
+
+<div style="padding: 1rem;">
+    <a href="/" style="color:white;font-weight:bold;text-decoration:none;">⬅️ Back to Home</a>
+</div>
+
+<h1>Digital Forensics Tools</h1>
+
+<!-- 🔐 Image Steganography -->
+<div class="tool-card">
+    <h2>Image Steganography</h2>
+  
+    <!-- Encode -->
+    <h3>Encode Message into Image</h3>
+    <form method="POST" action="/tools/stego/encode" enctype="multipart/form-data">
+      <input type="file" name="image" required onchange="showFileName(this)">
+      <span class="filename-display"></span>
+      <textarea name="message" rows="3" placeholder="Enter secret message..." required></textarea>
+      <div class="btn-group">
+        <button type="submit">Encode</button>
+        <button type="button" onclick="clearOutput('stego-box')">Clear</button>
+      </div>
+    </form>
+  
+    {% if encoded_image %}
+    <div id="stego-box" class="output-box encoded-preview">
+      <p>✅ Message encoded successfully in image.</p>
+      <a href="/uploads/{{ encoded_image }}" download>⬇️ Download Encoded Image</a><br>
+      <img src="/uploads/{{ encoded_image }}" alt="Encoded Image Preview">
+    </div>
+    {% endif %}
+  
+    <!-- Decode -->
+    <h3 style="margin-top: 40px;">Decode Message from Image</h3>
+    <form method="POST" action="/tools/stego/decode" enctype="multipart/form-data">
+      <input type="file" name="image" required onchange="showFileName(this)">
+      <span class="filename-display"></span>
+      <div class="btn-group">
+        <button type="submit">Decode</button>
+        <button type="button" onclick="clearOutput('decode-box')">Clear</button>
+      </div>
+    </form>
+  
+    {% if decode_result %}
+    <div id="decode-box" class="output-box stego-decode-output">
+      <p class="decode-success">✅ Decoded Message:</p>
+      <pre id="hiddenMsg" class="decoded-text-box">{{ decode_result }}</pre>
+      <button type="button" class="copy-btn" onclick="copyOutput('hiddenMsg')">📋 Copy Message</button>
+    </div>
+    {% endif %}
+  </div> <!-- ✅ Closing div for steganography tool-card -->
+  
+
+
+<!-- 🔐 File Hash Generator -->
+<div class="tool-card">
+    <h2>File Hash Generator</h2>
+    <form method="POST" action="/forensics/hash" enctype="multipart/form-data">
+        <input type="file" name="file" required onchange="showFileName(this)">
+        <span class="filename-display"></span>
+        <div class="btn-group">
+            <button type="submit">Generate Hashes</button>
+            <button type="button" onclick="copyOutput('hash-box')">Copy</button>
+            <button type="button" onclick="clearOutput('hash-box')">Clear</button>
+        </div>
+    </form>
+    {% if hash_result %}
+    <div id="hash-box" class="output-box">
+        <strong>MD5:</strong> {{ hash_result.md5 }}<br>
+        <strong>SHA1:</strong> {{ hash_result.sha1 }}<br>
+        <strong>SHA256:</strong> {{ hash_result.sha256 }}
+    </div>
+    {% endif %}
+    {% if error and error.hash %}
+    <div class="error-box">{{ error.hash }}</div>
+    {% endif %}
+</div>
+
+<!-- 🖋️ EXIF Metadata Editor with Enhanced UX -->
+<div class="tool-card">
+    <h2 style="color: #ffa07a; font-size: 24px; margin-bottom: 10px;">Edit & Download EXIF Metadata</h2>
+    <form method="POST" action="/tools/exif/edit" enctype="multipart/form-data" onsubmit="return validateGPS();">
+      <div style="display: flex; flex-direction: column; gap: 20px;">
+        
+        <!-- Upload with Preview -->
+        <div>
+          <label style="color: tomato; font-weight: bold;">Upload Image:</label>
+          <input type="file" name="image" accept="image/jpeg" required onchange="showFileName(this); previewImage(this);" 
+                 style="width: 100%; background: #2a2a2a; color: white; border: none; padding: 10px; border-radius: 8px;">
+          <span class="filename-display"></span>
+          <img id="preview" style="max-width: 200px; margin-top: 10px; display: none; border: 2px solid tomato; border-radius: 10px;" />
+        </div>
+  
+        <!-- Inputs Grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+          <div>
+            <label>Author/Artist Name:</label>
+            <input type="text" name="author" placeholder="e.g., John Doe" required class="input-field">
+          </div>
+          <div>
+            <label>Software Used:</label>
+            <input type="text" name="software" placeholder="e.g., Adobe Photoshop" required class="input-field">
+          </div>
+          <div>
+            <label>Description:</label>
+            <input type="text" name="description" placeholder="Short description of image" class="input-field">
+          </div>
+          <div>
+            <label>Camera Make:</label>
+            <input type="text" name="make" placeholder="e.g., Canon" class="input-field">
+          </div>
+          <div>
+            <label>Camera Model:</label>
+            <input type="text" name="model" placeholder="e.g., EOS 5D Mark IV" class="input-field">
+          </div>
+          <div>
+            <label>DateTime:</label>
+            <input type="datetime-local" name="datetime" id="datetime" class="input-field">
+          </div>
+          <div>
+            <label title="Value like 100–3200">ISO: 🛈</label>
+            <input type="number" name="iso" placeholder="e.g., 100" min="50" max="25600" class="input-field">
+          </div>
+          <div>
+            <label title="Format: Decimal + Space + N/S (e.g., 27.1751 N)">GPS Latitude: 🛈</label>
+            <input type="text" name="gps_lat" placeholder="e.g., 27.1751 N" class="input-field" id="gps_lat">
+          </div>
+          <div>
+            <label title="Format: Decimal + Space + E/W (e.g., 78.0421 E)">GPS Longitude: 🛈</label>
+            <input type="text" name="gps_lon" placeholder="e.g., 78.0421 E" class="input-field" id="gps_lon">
+          </div>
+          <div>
+            <label title="How the image is rotated or mirrored">Orientation: 🛈</label>
+            <select name="orientation" class="input-field">
+              <option value="1">Normal</option>
+              <option value="2">Mirrored horizontal</option>
+              <option value="3">Rotated 180°</option>
+              <option value="4">Mirrored vertical</option>
+              <option value="5">Mirrored horizontal & rotated 270°</option>
+              <option value="6">Rotated 90°</option>
+              <option value="7">Mirrored horizontal & rotated 90°</option>
+              <option value="8">Rotated 270°</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      <div>
+        <label>Encoding Mode:</label>
+        <select name="encoding_mode" class="input-field">
+          <option value="clean" selected>Clean (remove garbage)</option>
+          <option value="garbage">Garbage (add special symbols)</option>
+        </select>
+      </div>
+      
+      
+      
+      
+
+      <!-- Buttons -->
+      <div class="btn-group" style="margin-top: 20px; display: flex; gap: 10px;">
+        <button type="submit">Save Metadata</button>
+        <button type="reset">Clear</button>
+      </div>
+    </form>
+  </div>
+  
+  <!-- ✅ Toast Notification -->
+  <div id="toast" style="position: fixed; bottom: 30px; right: 30px; background: #00c853; color: white; padding: 10px 20px; border-radius: 8px; display: none; font-weight: bold;">
+    ✅ Metadata Saved!
+  </div>
+  
+  <!-- ✅ Script Section -->
+  <script>
+  function previewImage(input) {
+    const file = input.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const preview = document.getElementById("preview");
+        preview.src = e.target.result;
+        preview.style.display = "block";
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+  
+  // Auto-fill current datetime on load
+  window.addEventListener('load', () => {
+    const dtInput = document.getElementById('datetime');
+    if (dtInput) {
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      dtInput.value = now.toISOString().slice(0, 16);
+    }
+  });
+  
+  // Show Toast
+  function showToast() {
+    const toast = document.getElementById('toast');
+    toast.style.display = 'block';
+    setTimeout(() => { toast.style.display = 'none'; }, 3000);
+  }
+  
+  // GPS Pattern Validation
+  function validateGPS() {
+    const lat = document.getElementById('gps_lat').value.trim();
+    const lon = document.getElementById('gps_lon').value.trim();
+    const pattern = /^\d+(\.\d+)?\s[NSEW]$/;
+  
+    if ((lat && !pattern.test(lat)) || (lon && !pattern.test(lon))) {
+      alert('Invalid GPS format! Use: 27.1751 N or 78.0421 E');
+      return false;
+    }
+  
+    showToast();
+    return true;
+  }
+  </script>
+  
+  <!-- ✅ Input Field Styling -->
+  <style>
+  .input-field {
+    width: 100%;
+    padding: 10px;
+    background: #2a2a2a;
+    color: white;
+    border: none;
+    border-radius: 8px;
+  }
+  label {
+    color: tomato;
+    font-weight: bold;
+  }
+  </style>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+      function showError(input, message) {
+        input.style.borderColor = "red";
+        if (!input.nextElementSibling || !input.nextElementSibling.classList.contains('error-msg')) {
+          const errorMsg = document.createElement('small');
+          errorMsg.className = 'error-msg';
+          errorMsg.style.color = 'red';
+          errorMsg.style.display = 'block';
+          errorMsg.innerText = message;
+          input.parentNode.appendChild(errorMsg);
+        } else {
+          input.nextElementSibling.innerText = message;
+        }
+      }
+    
+      function clearError(input) {
+        input.style.borderColor = '';
+        if (input.nextElementSibling && input.nextElementSibling.classList.contains('error-msg')) {
+          input.parentNode.removeChild(input.nextElementSibling);
+        }
+      }
+    
+      function validateGPS(input) {
+        const val = input.value.trim().toUpperCase();
+        if (val === "") return clearError(input);
+        const match = /^\d+(\.\d+)?\s+[NSEW]$/.test(val);
+        match ? clearError(input) : showError(input, "Format: e.g., 27.1751 N");
+      }
+    
+      function validateISO(input) {
+        const val = parseInt(input.value, 10);
+        if (!input.value) return clearError(input);
+        (val >= 50 && val <= 25600) ? clearError(input) : showError(input, "ISO must be between 50–25600");
+      }
+    
+      function validateDatetime(input) {
+        if (!input.value) return clearError(input);
+        const dt = new Date(input.value);
+        isNaN(dt.getTime()) ? showError(input, "Invalid datetime format") : clearError(input);
+      }
+    
+      document.querySelectorAll("input[name='gps_lat'], input[name='gps_lon']").forEach(input => {
+        input.addEventListener('input', () => validateGPS(input));
+      });
+    
+      const iso = document.querySelector("input[name='iso']");
+      if (iso) iso.addEventListener('input', () => validateISO(iso));
+    
+      const datetime = document.querySelector("input[name='datetime']");
+      if (datetime) datetime.addEventListener('input', () => validateDatetime(datetime));
+    });
+    </script>
+    
+
+  
+  
+  <!-- 🔐 Existing EXIF Metadata Extractor -->
+  <div class="tool-card">
+    <h2 style="color: #ffa07a; font-size: 24px;">EXIF Metadata Extractor</h2>
+    <form method="POST" action="/tools/exif" enctype="multipart/form-data">
+      <label style="color: tomato; font-weight: bold;">Upload Image:</label>
+      <input type="file" name="image" required onchange="showFileName(this)" style="width: 100%; background: #2a2a2a; color: white; border: none; padding: 10px; border-radius: 8px;">
+      <span class="filename-display"></span>
+      <div class="btn-group" style="margin-top: 10px; display: flex; gap: 10px;">
+        <button type="submit">Extract Metadata</button>
+        <button type="button" onclick="copyOutput('exifDataOnly')">Copy</button>
+        <button type="button" onclick="clearOutput('exif-box')">Clear</button>
+      </div>
+    </form>
+    {% if exif_data %}
+    <div id="exif-box" class="output-box" style="margin-top: 20px;">
+      <div style="font-weight: bold; margin-bottom: 5px; font-size: 16px; color: #ffa07a;">EXIF Metadata Table:</div>
+      <table style="width: 100%; border-collapse: collapse; color: white; font-size: 14px;">
+        <thead>
+          <tr style="background-color: #1e1e1e; border-bottom: 2px solid tomato;">
+            <th style="text-align: left; padding: 8px;">Tag</th>
+            <th style="text-align: left; padding: 8px;">Value</th>
+          </tr>
+        </thead>
+        <tbody id="exifDataOnly">
+          {% for tag, value in exif_data.items() %}
+          <tr>
+            <td style="padding: 6px; border-bottom: 1px solid #444;">{{ tag }}</td>
+            <td style="padding: 6px; border-bottom: 1px solid #444;">{{ value }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+    {% if error and error.exif %}
+    <div class="error-box">⚠️ {{ error.exif }}</div>
+    {% endif %}
+  </div>
+  
+  <script>
+  function copyOutput(boxId) {
+    const element = document.getElementById(boxId);
+    if (!element) return;
+    const temp = document.createElement('textarea');
+    temp.value = element.innerText || element.value;
+    document.body.appendChild(temp);
+    temp.select();
+    document.execCommand('copy');
+    document.body.removeChild(temp);
+    alert("Copied to clipboard!");
+  }
+  
+  function clearOutput(boxId) {
+    const box = document.getElementById(boxId);
+    if (box) box.innerHTML = '';
+  }
+  </script>
+  
+  
+
+
+
+
+<!-- 🧠 Chatbot Include -->
+{% include 'chatbot.html' %}
+
+<script>
+function copyOutput(boxId) {
+    const box = document.getElementById(boxId);
+    if (!box) return;
+    const temp = document.createElement('textarea');
+    temp.value = box.value || box.innerText;
+    document.body.appendChild(temp);
+    temp.select();
+    document.execCommand('copy');
+    document.body.removeChild(temp);
+    alert("Copied to clipboard!");
+}
+
+function clearOutput(boxId) {
+    const box = document.getElementById(boxId);
+    if (box) box.value ? box.value = '' : box.innerHTML = '';
+}
+
+function showFileName(input) {
+    const span = input.nextElementSibling;
+    if (input.files.length > 0) {
+        span.innerText = input.files[0].name;
+    } else {
+        span.innerText = '';
+    }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CyberNest - Home</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: 'JetBrains Mono', monospace;
+      background: linear-gradient(to right, #0f0c29, #302b63, #24243e);
+      color: white;
+      display: flex;
+      flex-direction: column;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 10px;
+      animation: fadeInDown 1s ease-in-out;
+    }
+
+    p {
+      font-size: 1.2rem;
+      color: #aaa;
+      animation: fadeIn 2s ease-in-out;
+    }
+
+    .tools-container {
+      display: flex;
+      gap: 30px;
+      margin-top: 50px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .tool-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 30px;
+      width: 280px;
+      text-align: center;
+      transition: 0.3s ease;
+      box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    }
+
+    .tool-card:hover {
+      transform: scale(1.05);
+    }
+
+    .ctf { border: 2px solid cyan; }
+    .ctf:hover { box-shadow: 0 0 20px cyan; }
+
+    .crypto { border: 2px solid violet; }
+    .crypto:hover { box-shadow: 0 0 20px violet; }
+
+    .forensics { border: 2px solid tomato; }
+    .forensics:hover { box-shadow: 0 0 20px tomato; }
+
+    .tools { border: 2px solid #4cff79; }
+    .tools:hover { box-shadow: 0 0 20px #4cff79; }
+
+    .tool-card a {
+      display: inline-block;
+      margin-top: 15px;
+      padding: 10px 20px;
+      color: white;
+      text-decoration: none;
+      border: 1px solid white;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .tool-card a:hover {
+      background: white;
+      color: black;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 14px;
+    }
+
+    footer a {
+      color: #ff4c4c;
+      text-decoration: none;
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+
+  </style>
+</head>
+<body>
+<main>
+  <h1>🔐 CyberNest</h1>
+  <p>Your All-in-One Cybersecurity Toolkit</p>
+  <div class="tools-container">
+    <div class="tool-card ctf">
+      <h2>CTF Helpers</h2>
+      <p>Decode Base64, ROT13, Base58 and more</p>
+      <a href="/ctf">Launch</a>
+    </div>
+    <div class="tool-card crypto">
+      <h2>Cryptography</h2>
+      <p>Custom Encryption & Secure Decryption</p>
+      <a href="/crypto">Launch</a>
+    </div>
+    <div class="tool-card forensics">
+      <h2>Digital Forensics</h2>
+      <p>Image Steganography & EXIF Metadata</p>
+      <a href="/forensics">Launch</a>
+    </div>
+    <div class="tool-card tools">
+      <h2>Forensic Analyzer</h2>
+      <p>Hex Editor & Analyze Metadata</p>
+      <a href="/tools">Launch</a>
+    </div>
+  </div>
+</main>
+
+<!-- ✅ Floating Chatbot Included -->
+{% include 'chatbot.html' %}
+
+<footer>
+  © 2025 CyberNest. All rights reserved.<br>
+  Made with ❤️ by CyberNest Team. | CyberNest v1.0
+</footer>
+
+</body>
+</html>

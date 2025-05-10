@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CyberNest - Tools</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: #121212;
+      color: #4cff79;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 30px;
+    }
+
+    h1 {
+      text-align: left;
+      margin-bottom: 40px;
+      color: #4cff79;
+    }
+
+    .tool-card {
+      background: #1e1e1e;
+      padding: 25px;
+      margin-bottom: 30px;
+      border-radius: 15px;
+      border: 2px solid #4cff79;
+      box-shadow: 0 0 15px #4cff79;
+    }
+
+    h4 {
+      color: #00ffff;
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-top: 25px;
+      margin-bottom: 10px;
+    }
+
+    textarea, input[type="file"] {
+      width: 100%;
+      padding: 10px;
+      background: #2a2a2a;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      margin-top: 10px;
+      margin-bottom: 15px;
+    }
+
+
+    .hex-image-preview {
+  text-align: center;
+  margin-top: 20px;
+  padding: 15px;
+  background: transparent;
+}
+
+.hex-success {
+  color: #00ff99; /* same green used in buttons */
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.hex-download-btn {
+  display: inline-block;
+  margin-top: 10px;
+  font-weight: bold;
+  background: #00ff99;
+  color: black;
+  text-decoration: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.hex-download-btn:hover {
+  background: black;
+  color: #00ff99;
+  border: 1px solid #00ff99;
+}
+
+.hex-output-img {
+  max-width: 100%;
+  max-height: 300px;
+  margin-top: 15px;
+  border-radius: 10px;
+  border: 2px solid #00ff99;
+}
+
+
+.hex-image-preview {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.hex-success {
+  color: #4cff79;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.hex-download-btn {
+  display: inline-block;
+  margin: 10px auto;
+  padding: 10px 20px;
+  background-color: #4cff79;
+  color: black;
+  text-decoration: none;
+  font-weight: bold;
+  border-radius: 8px;
+}
+
+.hex-download-btn:hover {
+  background-color: black;
+  color: #4cff79;
+  border: 1px solid #4cff79;
+}
+
+.hex-image-scroll-box {
+  overflow-x: auto;
+  max-width: 100%;
+  border: 2px solid #4cff79;
+  border-radius: 10px;
+  padding: 10px;
+  margin: 15px auto;
+}
+
+.hex-output-img {
+  min-width: 600px;
+  max-width: 100%;
+  height: auto;
+}
+
+.stego-decode-output {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #1e1e1e;
+  border: 2px solid #4cff79;
+  border-radius: 10px;
+  box-shadow: 0 0 15px #4cff79;
+  text-align: center;
+}
+
+.decode-success {
+  color: #4cff79;
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+.decoded-text-box {
+  background: #2a2a2a;
+  padding: 10px;
+  border-radius: 8px;
+  color: #ffffff;
+  word-break: break-word;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+.copy-btn-green {
+  background: #4cff79;
+  color: black;
+  padding: 10px 25px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.copy-btn-green:hover {
+  background: black;
+  color: #4cff79;
+  border: 1px solid #4cff79;
+}
+
+    button, .copy-btn {
+      background: #4cff79;
+      color: black;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 10px;
+      margin-right: 10px;
+    }
+
+    button:hover, .copy-btn:hover {
+      background: black;
+      color: #4cff79;
+      border: 1px solid #4cff79;
+    }
+
+    a.back-home {
+      display: inline-block;
+      margin-bottom: 30px;
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      background: #111;
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 15px;
+    }
+
+    .button-row {
+      margin-top: 5px;
+      margin-bottom: 10px;
+    }
+
+
+
+  </style>
+</head>
+<body>
+
+<a href="/" class="back-home">⬅️ Back to Home</a>
+<h1>Forensic Analyzer Suite</h1>
+
+<!-- HEX Viewer & Editor and HEX to Binary/Image Conversion Tool -->
+<!-- ✅ HEX Viewer & Editor -->
+<div class="tool-card">
+  <h2>HEX Viewer & Editor</h2>
+  <form method="POST" action="/tools/hex-viewer" enctype="multipart/form-data">
+      <input type="file" name="file" required onchange="showFileName(this)">
+      <span class="filename-display"></span>
+      <div class="btn-group">
+          <button type="submit">View HEX</button>
+          <button type="button" onclick="clearOutput('hex-box')">Clear</button>
+      </div>
+  </form>
+
+  {% if hex_data %}
+  <textarea id="hex-box" class="output-box" rows="10" style="overflow-x: auto;">{{ hex_data }}</textarea>
+  <div class="btn-group">
+      <button type="button" class="copy-btn" onclick="copyOutput('hex-box')">Copy HEX Data</button>
+      <button type="button" class="copy-btn" onclick="downloadHex()">Download HEX</button>
+  </div>
+  {% endif %}
+</div>
+
+
+<!-- HEX to Binary/Image Conversion Tool -->
+<div class="tool-card">
+  <h2>HEX to Binary/Image Conversion</h2>
+  <form id="hexToImageForm" action="/tools/hex-to-image" method="post" enctype="multipart/form-data">
+    <input type="file" name="hex_file" id="hexFileInput" accept=".txt,.hex,.bin" required onchange="showFileName(this)">
+    <span class="filename-display"></span>
+    <div class="btn-group">
+      <button type="submit">Convert HEX</button>
+      <button type="button" onclick="clearHexToImage()">Clear</button>
+    </div>
+  </form>
+
+  {% if hex_image %}
+  <div class="hex-image-preview">
+    <p class="hex-success">✅ Conversion successful.</p>
+    <a href="/uploads/{{ hex_image }}" download class="hex-download-btn">⬇️ Download Image</a><br>
+    
+    <!-- 🔁 Scrollable image container -->
+    <div class="hex-image-scroll-box">
+      <img src="/uploads/{{ hex_image }}" alt="Converted Image Preview" class="hex-output-img">
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- File Metadata Analyzer Tool -->
+<div class="tool-card">
+  <h2>File Metadata Analyzer</h2>
+  <form id="metadataForm" action="/tools/metadata" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" id="metadataFile" accept="*/*" required onchange="showFileName(this)">
+    <span class="filename-display"></span>
+    <div class="button-row">
+      <button type="submit">Analyze Metadata</button>
+      <button type="button" onclick="resetMetadata()">Clear</button>
+    </div>
+  </form>
+
+  {% if metadata %}
+  <div class="output-box">
+    <strong>Metadata ({{ file_type | capitalize }}):</strong><br>
+    <table style="width:100%; margin-top:10px; border-collapse: collapse;">
+      <thead>
+        <tr style="background: #1e1e1e; color: #4cff79;">
+          <th style="padding: 8px; border: 1px solid #4cff79;">Key</th>
+          <th style="padding: 8px; border: 1px solid #4cff79;">Value</th>
+          <th style="padding: 8px; border: 1px solid #4cff79;">Meaning</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for key, value in metadata.items() %}
+        <tr>
+          <td style="padding: 8px; border: 1px solid #4cff79; color: #4cff79;"><code>{{ key }}</code></td>
+          <td style="padding: 8px; border: 1px solid #4cff79; color: white;">{{ value }}</td>
+          <td style="padding: 8px; border: 1px solid #4cff79; color: #aaa;">
+            {% if file_type == 'image' %}
+              {% if key == 'format' %}Image file format (e.g. JPEG, PNG)
+              {% elif key == 'mode' %}Color mode (RGB, RGBA, grayscale, etc.)
+              {% elif key == 'size' %}Dimensions (width × height in pixels)
+              {% elif key.startswith("EXIF_") %}EXIF tag from the image
+              {% else %}-{% endif %}
+            {% elif file_type == 'pdf' %}
+              {% if key == '/CreationDate' %}Document creation date
+              {% elif key == '/ModDate' %}Last modified date
+              {% else %}-{% endif %}
+            {% elif file_type == 'docx' %}
+              {% if key == 'author' %}Author of the document
+              {% elif key == 'title' %}Title of the document
+              {% elif key == 'subject' %}Subject/category of the document
+              {% elif key == 'created' %}When the document was created
+              {% elif key == 'modified' %}Last modified timestamp
+              {% else %}-{% endif %}
+            {% else %}-{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+
+
+<!-- Script -->
+<script>
+  function resetHex() {
+    document.getElementById("hexForm").reset();
+    document.getElementById("hexOutput").innerText = "";
+  }
+
+  function resetMetadata() {
+    document.getElementById("metadataForm").reset();
+    document.getElementById("metadataOutput").innerText = "";
+  }
+
+  function resetHexToImage() {
+    document.getElementById("hexToImageForm").reset();
+    document.getElementById("hexToImageOutput").innerText = "";
+  }
+
+  function copyToClipboard(id) {
+    const el = document.getElementById(id);
+    if (el) {
+      navigator.clipboard.writeText(el.innerText.trim())
+        .then(() => alert("Copied to clipboard!"))
+        .catch(() => alert("Copy failed"));
+    }
+  }
+</script>
+<!-- ✅ Floating Chatbot Included -->
+{% include 'chatbot.html' %}
+
+</body>
+</html>
+
+
+<script>
+  function copyOutput(boxId) {
+      const box = document.getElementById(boxId);
+      if (!box) return;
+      const temp = document.createElement('textarea');
+      temp.value = box.value || box.innerText;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand('copy');
+      document.body.removeChild(temp);
+      alert("Copied to clipboard!");
+  }
+  
+  function clearOutput(boxId) {
+      const box = document.getElementById(boxId);
+      if (box) box.value ? box.value = '' : box.innerHTML = '';
+  }
+  
+  function showFileName(input) {
+      const span = input.nextElementSibling;
+      if (input.files.length > 0) {
+          span.innerText = `File: ${input.files[0].name}`;
+      } else {
+          span.innerText = '';
+      }
+  }
+  
+  function downloadHex() {
+      const content = document.getElementById('hex-box')?.value;
+      if (!content) return;
+      const blob = new Blob([content], { type: 'text/plain' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'hex_output.txt';
+      a.click();
+  }
+  </script>
+  
+    
+
+  <script>
+    function clearHexToImage() {
+        // Clear file input
+        document.getElementById("hexFileInput").value = "";
+    
+        // Clear filename text
+        const span = document.querySelector(".filename-display");
+        if (span) span.innerText = "";
+    
+        // Remove the preview block if it exists
+        const preview = document.querySelector(".hex-image-preview");
+        if (preview) preview.remove();
+    }
+    
+    function showFileName(input) {
+        const span = input.nextElementSibling;
+        if (input.files.length > 0) {
+            span.innerText = `File: ${input.files[0].name}`;
+        } else {
+            span.innerText = '';
+        }
+    }
+    </script>
+    
+    <script>
+      function resetMetadata() {
+        document.getElementById("metadataForm").reset();
+        const output = document.querySelector(".output-box");
+        if (output) output.remove();
+        const filename = document.querySelector(".filename-display");
+        if (filename) filename.innerText = "";
+      }
+      
+      function showFileName(input) {
+        const span = input.nextElementSibling;
+        if (input.files.length > 0) {
+          span.innerText = `File: ${input.files[0].name}`;
+        } else {
+          span.innerText = '';
+        }
+      }
+      </script>
+      
+
+
+      
