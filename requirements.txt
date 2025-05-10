@@ -2,3 +2,4 @@ flask
 Pillow
 PyPDF2
 gunicorn
+piexif
